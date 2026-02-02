@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Schema; // Tambahkan ini di atas
 
 class UserSeeder extends Seeder
 {
@@ -13,6 +14,8 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        Schema::disableForeignKeyConstraints();
+        
         User::truncate();
 
         $admin = \App\Models\User::create([
@@ -29,5 +32,7 @@ class UserSeeder extends Seeder
             'email'=>'member@gmail.com',
             'password'=> bcrypt('password')
         ]);
+
+        Schema::enableForeignKeyConstraints();
     }
 }

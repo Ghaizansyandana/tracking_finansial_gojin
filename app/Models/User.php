@@ -17,6 +17,9 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+
+    public function transaksi() { return $this->hasMany(Transaksi::class); }
+
     protected $fillable = [
         'name',
         'email',

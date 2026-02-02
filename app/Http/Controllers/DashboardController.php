@@ -1,14 +1,14 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Dashboard; // Tambahkan \Dashboard
 
+use App\Http\Controllers\Controller; // Tambahkan ini agar bisa extend Controller
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
 {
     public function index()
     {
-        // Mengarahkan ke file resources/views/dashboard.blade.php
         return view('dashboard.index');
     }
 }
