@@ -18,15 +18,14 @@ class Transaksi extends Model
      * Kolom yang boleh diisi secara massal.
      */
     protected $fillable = [
-        'tanggal',
-        'jenis',
-        'kategori_id',
-        'akun_id',
-        'user_id',
-        'jumlah',
-        'keterangan',
+        'tanggal', 
+        'jenis', 
+        'kategori_id', 
+        'akun_id', 
+        'jumlah', 
+        'keterangan', 
+        'user_id'
     ];
-
     /**
      * Casting tipe data agar lebih mudah digunakan di Frontend/Logic.
      */
