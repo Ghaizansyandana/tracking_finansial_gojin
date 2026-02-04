@@ -3,24 +3,18 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        @if(session('success'))
-            <div class="alert alert-success alert-dismissible" role="alert">
-                {{ session('success') }}
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-        @endif
-
-        @if(session('error'))
-            <div class="alert alert-danger alert-dismissible" role="alert">
-                {{ session('error') }}
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-        @endif
-        <h4 class="fw-bold py-3 mb-0">Riwayat Transaksi</h4>
-        <a href="{{ route('dashboard.transaksi.create') }}" class="btn btn-primary">
-            <i class="bx bx-plus"></i> Tambah Transaksi
-        </a>
+        <h4 class="fw-bold py-3 mb-0"><span class="text-muted fw-light">Data /</span> Riwayat Transaksi</h4>
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
+            <i class="bx bx-plus me-1"></i> Tambah Transaksi
+        </button>
     </div>
+
+    @if(session('success'))
+    <div class="alert alert-primary alert-dismissible" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
 
     <div class="card">
         <div class="table-responsive text-nowrap">
@@ -28,37 +22,47 @@
                 <thead>
                     <tr>
                         <th>Tanggal</th>
-                        <th>Kategori</th>
-                        <th>Akun</th>
-                        <th>Jumlah</th>
-                        <th>Jenis</th>
+                        <th>Judul</th>
+                        <th>Tipe</th>
+                        <th>Nominal</th>
+                        <th>Aksi</th>
                     </tr>
                 </thead>
-                <tbody>
-                    @foreach($transaksis as $t)
+                <tbody class="table-border-bottom-0">
+                    @forelse($transaksis as $t)
                     <tr>
+                        <td>{{ \Carbon\Carbon::parse($t->tanggal)->format('d M Y') }}</td>
+                        <td><strong>{{ $t->judul }}</strong></td>
                         <td>
-                            @if(\Carbon\Carbon::parse($t->tanggal)->isToday())
-                                <span class="text-primary fw-bold">Hari Ini</span>
-                            @elseif(\Carbon\Carbon::parse($t->tanggal)->isYesterday())
-                                <span class="text-secondary">Kemarin</span>
+                            @if($t->tipe == 'masuk')
+                                <span class="badge bg-label-success">Pemasukan</span>
                             @else
-                                {{ \Carbon\Carbon::parse($t->tanggal)->format('d M Y') }}
+                                <span class="badge bg-label-danger">Pengeluaran</span>
                             @endif
                         </td>
-                        <td>{{ $t->kategori->nama }}</td>
-                        <td>{{ $t->akun->nama_akun }}</td>
-                        <td class="fw-bold">Rp {{ number_format($t->jumlah) }}</td>
+                        <td class="{{ $t->tipe == 'masuk' ? 'text-success' : 'text-danger' }} fw-bold">
+                            {{ $t->tipe == 'masuk' ? '+' : '-' }} Rp {{ number_format($t->nominal, 0, ',', '.') }}
+                        </td>
                         <td>
-                            <span class="badge {{ $t->jenis == 'pemasukan' ? 'bg-label-success' : 'bg-label-danger' }}">
-                                {{ ucfirst($t->jenis) }}
-                            </span>
+                            <form action="{{ route('dashboard.transaksi.destroy', $t->id) }}" method="POST" onsubmit="return confirm('Hapus transaksi ini?')">
+                                @csrf 
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-sm btn-icon text-danger">
+                                    <i class="bx bx-trash"></i>
+                                </button>
+                            </form>
                         </td>
                     </tr>
-                    @endforeach
+                    @empty
+                    <tr>
+                        <td colspan="5" class="text-center py-4">Belum ada data transaksi.</td>
+                    </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
     </div>
 </div>
+
+@include('dashboard.transaksi.modal-tambah') 
 @endsection

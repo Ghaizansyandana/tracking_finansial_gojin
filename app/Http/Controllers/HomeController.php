@@ -1,40 +1,45 @@
 <?php
-
+// homecontroller
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB; // Tambahkan ini jika pakai Query Builder
+// use App\Models\Transaction; // Tambahkan ini jika kamu pakai Model Transaction
 
 class HomeController extends Controller
 {
-    /**
-     * Create a new controller instance.
-     *
-     * @return void
-     */
     public function __construct()
     {
         $this->middleware('auth');
     }
 
-    /**
-     * Show the application dashboard.
-     *
-     * @return \Illuminate\Contracts\Support\Renderable
-     */
     public function index()
     {
-        $user = auth()->user();
-        
-        // Logic dummy (ganti dengan query database aslimu nanti)
-        $totalSaldo = 1500000; 
-        $pemasukanBulanIni = 500000;
-        $pengeluaranBulanIni = 200000; // Siapkan sekalian siapa tahu Blade kamu butuh ini nanti
+        $user = auth()->user(); 
+        $totalSaldo = DB::table('akun_keuangan')->sum('saldo_awal');
 
-        // Kirim semua variabel ke view
+        // Gunakan JOIN untuk mengambil nama kategori
+        // Ambil data transaksi saja tanpa join ke tabel kategori yang belum ada
+        $transaksiTerakhir = DB::table('transaksi')
+        ->latest()
+        ->limit(5)
+        ->get();
+        
+        $pemasukanBulanIni = DB::table('transaksi')
+                            ->where('jenis', 'pemasukan')
+                            ->whereMonth('created_at', date('m'))
+                            ->sum('jumlah');
+
+        $pengeluaranBulanIni = DB::table('transaksi')
+                            ->where('jenis', 'pengeluaran')
+                            ->whereMonth('created_at', date('m'))
+                            ->sum('jumlah');
+
         return view('home', compact(
             'user', 
+            'transaksiTerakhir', 
             'totalSaldo', 
-            'pemasukanBulanIni', 
+            'pemasukanBulanIni',
             'pengeluaranBulanIni'
         ));
     }

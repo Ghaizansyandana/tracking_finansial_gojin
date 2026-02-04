@@ -51,10 +51,14 @@ class RegisterController extends Controller
         return Validator::make($data, [
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'], // Tambahkan 'confirmed' di sini
         ]);
     }
-
+    
+    public function showRegistrationForm()
+    {
+        return view('auth.register'); // Pastikan ini mengarah ke file Blade Sneat kamu
+    }
     /**
      * Create a new user instance after a valid registration.
      *

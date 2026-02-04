@@ -11,15 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('transaksi', function (Blueprint $table) {
+        Schema::create('transaksis', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('judul'); // Contoh: "Beli Kopi" atau "Gaji Bulanan"
+            $table->enum('tipe', ['masuk', 'keluar']);
+            $table->decimal('nominal', 15, 2); // Bisa menampung sampai ratusan milyar
             $table->date('tanggal');
-            $table->enum('jenis', ['pemasukan', 'pengeluaran']);
-            $table->foreignId('kategori_id')->constrained('kategori_keuangan');
-            $table->foreignId('akun_id')->constrained('akun_keuangan');
-            $table->foreignId('user_id')->constrained('users');
-            $table->decimal('jumlah', 15, 2);
-            $table->text('keterangan')->nullable();
+            $table->text('catatan')->nullable();
             $table->timestamps();
         });
     }

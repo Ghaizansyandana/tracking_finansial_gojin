@@ -8,16 +8,21 @@ use Illuminate\Http\Request;
 
 class UserController extends Controller
 {
-
     public function index()
     {
-        $title = 'Delete User!';
-        $text  = "Are you sure you want to delete?";
-        confirmDelete($title, $text);
-        $users = User::all();
+        // JANGAN pakai User::all(), harus pakai paginate()
+        $users = User::latest()->paginate(10); 
         return view('dashboard.users.index', compact('users'));
     }
-
+    public function __construct()
+    {
+        $this->middleware(function ($request, $next) {
+            if (auth()->user()->role !== 'admin') {
+                abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+            }
+            return $next($request);
+        });
+    }
     public function create()
     {
         return view('dashboard.users.create');
@@ -70,5 +75,22 @@ class UserController extends Controller
         $user->delete();
         Alert::success('Success', 'User deleted successfully');
         return redirect()->route('dashboard.users.index');
+    }
+
+    public function updateRole(Request $request, User $user)
+    {
+        $request->validate([
+            'role' => 'required|in:admin,user',
+        ]);
+
+        // Kita pakai DB update manual untuk memastikan quotes-nya benar jika Eloquent bermasalah
+        \DB::table('users')
+            ->where('id', $user->id)
+            ->update([
+                'role' => (string) $request->role,
+                'updated_at' => now()
+            ]);
+
+        return redirect()->route('dashboard.users.index')->with('success', 'Role berhasil diperbarui!');
     }
 }

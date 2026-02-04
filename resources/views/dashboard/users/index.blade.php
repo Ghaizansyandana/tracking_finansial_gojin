@@ -1,69 +1,101 @@
 @extends('layouts.dashboard')
+
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
-    <div class="row">
-        <div class="col">
-            <div class="card">
-                <div class="card-header">
-                    Data Users
-                    <a href="{{ route('dashboard.users.create') }}" class="btn btn-primary btn-sm float-end">
-                        Add User
-                    </a>
+    <h4 class="fw-bold py-3 mb-4"><span class="text-muted fw-light">Admin /</span> Manajemen Pengguna</h4>
+    @if(session('success'))
+    <div class="alert alert-primary alert-dismissible" role="alert">
+        {{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    @endif
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="mb-0">Daftar Pengguna Aktif</h5>
+            <small class="text-muted float-end">Total: {{ method_exists($users, 'total') ? $users->total() : $users->count() }} User</small>
+        </div>
+
+        <div class="card-footer py-3">
+            <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                    @if(method_exists($users, 'firstItem'))
+                        Menampilkan {{ $users->firstItem() }} sampai {{ $users->lastItem() }} dari {{ $users->total() }} data
+                    @else
+                        Menampilkan {{ $users->count() }} data
+                    @endif
                 </div>
-                <div class="card-body">
-                    <div class="table-responsive">
-                        <table class="table table-bordered" id="users-table">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach ($users as $user)
-                                <tr>
-                                    <td>{{ $user->id }}</td>
-                                    <td>{{ $user->name }}</td>
-                                    <td>{{ $user->email }}</td>
-                                    <td>{{ $user->role }}</td>
-                                    @if($loop->first && $user->role === 'admin')
-                                    <td>
-                                        <a href="{{ route('dashboard.users.edit', $user->id) }}"
-                                            class="btn btn-sm btn-warning">Edit</a>
-                                    </td>
-                                    @else
-                                    <td>
-                                        <a href="{{ route('dashboard.users.edit', $user->id) }}"
-                                            class="btn btn-sm btn-warning">Edit</a>
-                                        <a href="{{ route('dashboard.users.destroy', $user->id) }}"
-                                            class="btn btn-danger" data-confirm-delete="true">Delete</a>
-                                    </td>
-                                    @endif
-                                </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
-                    </div>
+                <div>
+                    {{-- Hanya tampilkan links jika $users adalah hasil paginasi --}}
+                    @if(method_exists($users, 'links'))
+                        {{ $users->links('pagination::bootstrap-5') }}
+                    @endif
                 </div>
+            </div>
+        </div>
+        
+        <div class="table-responsive text-nowrap">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Email</th>
+                        <th>Status Role</th>
+                        <th>Ubah Hak Akses</th>
+                    </tr>
+                </thead>
+                <tbody class="table-border-bottom-0">
+                    @foreach($users as $user)
+                    <tr>
+                        <td>
+                            <div class="d-flex justify-content-start align-items-center">
+                                <div class="avatar-wrapper">
+                                    <div class="avatar avatar-sm me-3">
+                                        <span class="avatar-initial rounded-circle bg-label-{{ $user->role == 'admin' ? 'primary' : 'info' }}">
+                                            {{ strtoupper(substr($user->name, 0, 2)) }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-semibold">{{ $user->name }}</span>
+                                    <small class="text-muted">ID: #{{ $user->id }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ $user->email }}</td>
+                        <td>
+                            @if($user->role == 'admin')
+                                <span class="badge bg-label-primary">
+                                    <i class="bx bx-shield-quarter me-1"></i> ADMIN
+                                </span>
+                            @else
+                                <span class="badge bg-label-secondary">
+                                    <i class="bx bx-user me-1"></i> USER
+                                </span>
+                            @endif
+                        </td>
+                        <td>
+                            <form action="{{ route('users.updateRole', $user->id) }}" method="POST">
+                                @csrf
+                                @method('PATCH') {{-- Pastikan ini ada! --}}
+                                
+                                <select name="role" onchange="this.form.submit()" class="form-select form-select-sm">
+                                    <option value="user" {{ $user->role == 'user' ? 'selected' : '' }}>Set User</option>
+                                    <option value="admin" {{ $user->role == 'admin' ? 'selected' : '' }}>Set Admin</option>
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="card-footer py-3">
+            <div class="d-flex justify-content-between">
+                <div class="text-muted">Menampilkan {{ $users->count() }} dari {{ $users->count() }} data</div>
+                <div>{{ $users->links('pagination::bootstrap-5') }}</div>
             </div>
         </div>
     </div>
 </div>
 @endsection
-
-@push('styles')
-<link rel="stylesheet" href="https://cdn.datatables.net/2.3.6/css/dataTables.bootstrap5.css">
-@endpush
-
-@push('scripts')
-<script src="https://cdn.datatables.net/2.3.6/js/dataTables.js"></script>
-<script src="https://cdn.datatables.net/2.3.6/js/dataTables.bootstrap5.js"></script>
-<script>
-    $(document).ready(function () {
-            $('#users-table').DataTable();
-        });
-</script>
-@endpush

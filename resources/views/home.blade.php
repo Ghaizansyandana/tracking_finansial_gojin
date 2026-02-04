@@ -8,6 +8,9 @@
                 <div class="d-flex align-items-end row">
                     <div class="col-sm-7">
                         <div class="card-body">
+                            @if(session('error'))
+                                <div class="alert alert-danger">{{ session('error') }}</div>
+                            @endif
                             <h5 class="card-title text-primary">Halo, {{ $user->name }}! 👋</h5>
                             <p class="mb-4">
                                 Hari ini total saldo dari semua akun keuangan kamu adalah 
@@ -75,8 +78,8 @@
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
-                                    <small class="text-muted d-block mb-1">{{ $trx->kategori->nama }}</small>
-                                    <h6 class="mb-0">{{ $trx->keterangan ?? 'Tanpa keterangan' }}</h6>
+                                <small class="text-muted d-block mb-1">Kategori</small>
+                                <h6 class="mb-0">{{ $trx->keterangan ?? 'Tanpa keterangan' }}</h6>
                                 </div>
                                 <div class="user-progress d-flex align-items-center gap-1">
                                     <h6 class="mb-0 {{ $trx->jenis == 'pemasukan' ? 'text-success' : 'text-danger' }}">

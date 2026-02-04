@@ -18,7 +18,7 @@ class User extends Authenticatable
      * @var list<string>
      */
 
-    public function transaksi() { return $this->hasMany(Transaksi::class); }
+    public function transaksis() { return $this->hasMany(Transaksi::class); }
 
     protected $fillable = [
         'name',
@@ -47,6 +47,7 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => 'string', // Tambahkan baris ini!
         ];
     }
 }

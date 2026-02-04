@@ -14,15 +14,13 @@ class TransaksiController extends Controller
 
     public function index()
     {
-        // Mengambil semua transaksi, diurutkan dari yang terbaru
-        // Kita gunakan with() agar data kategori dan akun ikut terbawa (Eager Loading)
-        $transaksis = Transaksi::with(['kategori', 'akun'])
-                                ->orderBy('tanggal', 'desc')
-                                ->get();
+        // Pastikan pakai paginate(jumlah_data), bukan get()
+        $transaksis = Transaksi::latest()
+                        ->paginate(10); // Menampilkan 10 data per halaman
 
         return view('dashboard.transaksi.index', compact('transaksis'));
     }
-
+    
     public function create()
     {
         // Mengambil semua akun dan kategori agar muncul di pilihan dropdown
@@ -38,7 +36,7 @@ class TransaksiController extends Controller
     {
         $request->validate([
             'tanggal' => 'required|date',
-            'jenis' => 'required|in:pemasukan,pengeluaran',
+            'jenis' => '    required|in:pemasukan,pengeluaran',
             'kategori_id' => 'required',
             'akun_id' => 'required',
             'jumlah' => 'required|numeric|min:1',
