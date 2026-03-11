@@ -3,16 +3,28 @@
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
     <div class="d-flex justify-content-between align-items-center mb-4">
-        <h4 class="fw-bold py-3 mb-0"><span class="text-muted fw-light">Data /</span> Riwayat Transaksi</h4>
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
-            <i class="bx bx-plus me-1"></i> Tambah Transaksi
-        </button>
+        <h4 class="fw-bold py-3 mb-0">
+            <span class="text-muted fw-light">Data /</span>
+            Riwayat Transaksi
+        </h4>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalTambah">
+                <i class="bx bx-plus me-1"></i> Tambah Transaksi
+            </button>
+            <a href="{{ route('transaksi.export') }}" class="btn btn-success">
+                <i class="bx bx-file"></i> Excel
+            </a>
+            <a href="{{ route('transaksi.pdf') }}" class="btn btn-danger">
+                <i class="bx bxs-file-pdf"></i> PDF
+            </a>
+        </div>
     </div>
 
     @if(session('success'))
     <div class="alert alert-primary alert-dismissible" role="alert">
         {{ session('success') }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+
     </div>
     @endif
 
@@ -24,6 +36,7 @@
                         <th>Tanggal</th>
                         <th>Judul</th>
                         <th>Tipe</th>
+                        <th>Metode Pembayaran</th>
                         <th>Nominal</th>
                         <th>Aksi</th>
                     </tr>
@@ -38,6 +51,13 @@
                                 <span class="badge bg-label-success">Pemasukan</span>
                             @else
                                 <span class="badge bg-label-danger">Pengeluaran</span>
+                            @endif
+                        </td>
+                        <td>
+                            @if($t->paymentMethod)
+                                {{ $t->paymentMethod->name }} ({{ $t->paymentMethod->type }})
+                            @else
+                                -
                             @endif
                         </td>
                         <td class="{{ $t->tipe == 'masuk' ? 'text-success' : 'text-danger' }} fw-bold">

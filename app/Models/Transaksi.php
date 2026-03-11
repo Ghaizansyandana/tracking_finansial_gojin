@@ -10,48 +10,45 @@ class Transaksi extends Model
 {
     use HasFactory;
 
-    // Nama tabel secara eksplisit (opsional jika nama tabel sudah 'transaksis', 
-    // tapi karena di ERD kamu 'transaksi', ini wajib ada)
-    protected $table = 'transaksi';
+    // Sesuai Migration Anda: 'transaksis' (pakai S)
+    protected $table = 'transaksis';
 
-    /**
-     * Kolom yang boleh diisi secara massal.
-     */
-    protected $fillable = ['user_id', 'judul', 'tipe', 'nominal', 'tanggal', 'catatan'];
-    /**
-     * Casting tipe data agar lebih mudah digunakan di Frontend/Logic.
-     */
-    protected $casts = [
-        'tanggal' => 'date',
-        'jumlah'  => 'decimal:2',
+    protected $fillable = [
+        'user_id', 
+        'judul', 
+        'tipe', 
+        'nominal', 
+        'tanggal', 
+        'catatan',
+        'kategori_id',
+        'akun_id',
+        'payment_method_id'  // Add payment method relationship
     ];
 
-    /*
-    |--------------------------------------------------------------------------
-    | RELASI ANTAR TABEL
-    |--------------------------------------------------------------------------
-    */
+    protected $casts = [
+        'tanggal' => 'date',
+        'nominal' => 'decimal:2',
+    ];
 
     /**
-     * Menghubungkan transaksi ke User yang membuatnya.
+     * Get the payment method associated with the transaction.
      */
+    public function paymentMethod()
+    {
+        // Pastikan foreign key-nya adalah payment_method_id sesuai hasil tinker tadi
+        return $this->belongsTo(PaymentMethod::class, 'payment_method_id');
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
 
-    /**
-     * Menghubungkan transaksi ke kategori (misal: Makan, Gaji).
-     */
     public function kategori(): BelongsTo
     {
-        // Parameter kedua adalah foreign_key di tabel transaksi
         return $this->belongsTo(KategoriKeuangan::class, 'kategori_id');
     }
 
-    /**
-     * Menghubungkan transaksi ke akun/dompet (misal: Bank, Cash).
-     */
     public function akun(): BelongsTo
     {
         return $this->belongsTo(AkunKeuangan::class, 'akun_id');

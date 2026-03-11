@@ -2,10 +2,22 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Grafik Pemasukan vs Pengeluaran (6 Bulan Terakhir)</h5>
+                </div>
+                <div class="card-body">
+                    <div id="transaksiMasukKeluarChart"></div>
+                </div>
+            </div>
+        </div>
+    </div>
     <div class="row">
         <div class="col-lg-8 mb-4 order-0">
             <div class="card">
-                <div class="d-flex align-items-end row">
+                <div class="d-flex align-items-end row">    
                     <div class="col-sm-7">
                         <div class="card-body">
                             <h5 class="card-title text-primary">Congratulations John! 🎉</h5>
@@ -364,7 +376,7 @@
         <div class="col-md-6 col-lg-4 order-2 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
-                    <h5 class="card-title m-0 me-2">Transactions</h5>
+                    <h5 class="card-title m-0">Transactions</h5>
                     <div class="dropdown">
                         <button class="btn p-0" type="button" id="transactionID" data-bs-toggle="dropdown"
                             aria-haspopup="true" aria-expanded="false">
@@ -477,3 +489,53 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        var el = document.querySelector('#transaksiMasukKeluarChart');
+        if (!el || typeof ApexCharts === 'undefined') return;
+
+        var labels = @json($labels ?? []);
+        var seriesMasuk = @json($seriesMasuk ?? []);
+        var seriesKeluar = @json($seriesKeluar ?? []);
+
+        var options = {
+            chart: {
+                type: 'bar',
+                height: 320,
+                toolbar: { show: false }
+            },
+            series: [
+                { name: 'Pemasukan', data: seriesMasuk },
+                { name: 'Pengeluaran', data: seriesKeluar }
+            ],
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: labels },
+            yaxis: {
+                labels: {
+                    formatter: function (val) { return 'Rp ' + (val || 0).toLocaleString('id-ID'); }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) { return 'Rp ' + (val || 0).toLocaleString('id-ID'); }
+                }
+            },
+            colors: ['#696cff', '#ff3e1d'],
+            legend: { position: 'top' }
+        };
+
+        var chart = new ApexCharts(el, options);
+        chart.render();
+    })();
+</script>
+@endpush

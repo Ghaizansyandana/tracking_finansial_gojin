@@ -4,7 +4,7 @@
             <span class="app-brand-logo demo">
                 <svg width="25" viewBox="0 0 25 42" ...>...</svg>
             </span>
-            <span class="app-brand-text demo menu-text fw-bolder ms-2">FINANCE</span>
+            <span class="app-brand-text demo menu-text fw-bolder ms-2">GOJIN TRACKING</span>
         </a>
 
         <a href="javascript:void(0);" class="layout-menu-toggle menu-link text-large ms-auto d-block d-xl-none">
@@ -22,12 +22,12 @@
             </a>
         </li>
 
-    <li class="menu-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
-        <a href="{{ route('dashboard.transaksi.index') }}" class="menu-link">
-            <i class="menu-icon tf-icons bx bx-transfer-alt"></i>
-            <div data-i18n="Analytics">Transaksi Saya</div>
-        </a>
-    </li>
+        <li class="menu-item {{ request()->routeIs('transaksi.*') ? 'active' : '' }}">
+            <a href="{{ route('dashboard.transaksi.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-transfer-alt"></i>
+                <div data-i18n="Analytics">Transaksi Saya</div>
+            </a>
+        </li>
 
         @if(auth()->user()->role == 'admin')
             <li class="menu-header small text-uppercase">
@@ -41,23 +41,13 @@
                 </a>
             </li>
 
-            <li class="menu-item">
-                <a href="#" class="menu-link">
-                    <i class="menu-icon tf-icons bx bx-cog"></i>
-                    <div>Pengaturan Sistem</div>
-                </a>
-            </li>
+    <li class="menu-item {{ request()->routeIs('dashboard.payment-methods.*') ? 'active' : '' }}">
+        <a href="{{ route('dashboard.payment-methods.index') }}" class="menu-link">
+                <i class="menu-icon tf-icons bx bx-credit-card"></i>
+            <div>Metode Pembayaran</div>
+        </a>
+    </li>
+
         @endif
-
-        <li class="menu-header small text-uppercase">
-            <span class="menu-header-text">Data Keuangan</span>
-        </li>
-
-        <li class="menu-item">
-            <a href="#" class="menu-link">
-                <i class="menu-icon tf-icons bx bx-wallet"></i>
-                <div>Akun Keuangan</div>
-            </a>
-        </li>
     </ul>
 </aside>

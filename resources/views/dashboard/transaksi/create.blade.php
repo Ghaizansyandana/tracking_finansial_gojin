@@ -49,7 +49,19 @@
                             @endforeach
                         </select>
                     </div>
+                    
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Metode Pembayaran</label>
+                        <select name="payment_method_id" class="form-select" required>
+                            <option value="">-- Pilih Metode Pembayaran --</option>
+                            @foreach(\App\Models\PaymentMethod::active()->get() as $method)
+                                <option value="{{ $method->id }}">{{ $method->name }} ({{ $method->type }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
 
+                <div class="row">
                     <div class="col-md-6 mb-3">
                         <label class="form-label">Kategori</label>
                         <select name="kategori_id" class="form-select" required>

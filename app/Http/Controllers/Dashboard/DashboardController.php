@@ -1,65 +1,65 @@
 <?php
 
-namespace App\Http\Controllers\Dashboard;
+namespace App\Http\Controllers\Dashboard; // Tambahkan \Dashboard
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Http\Controllers\Controller; // Tambahkan ini agar bisa extend Controller
+use App\Models\Transaksi;
 
 class DashboardController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+public function index()
+{
+    $userId = auth()->id();
+    
+    // Hitung TOTAL (Tanpa filter bulan agar kita cek datanya masuk atau tidak)
+    $totalMasuk = Transaksi::where('user_id', $userId)->where('tipe', 'masuk')->sum('nominal');
+    $totalKeluar = Transaksi::where('user_id', $userId)->where('tipe', 'keluar')->sum('nominal');
+    $totalSaldo = $totalMasuk - $totalKeluar;
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
+    // Hitung BULAN INI (Pastikan data di DB tanggalnya memang bulan ini)
+    $pemasukanBulanIni = Transaksi::where('user_id', $userId)
+        ->where('tipe', 'masuk')
+        ->whereMonth('tanggal', now()->month)
+        ->whereYear('tanggal', now()->year)
+        ->sum('nominal');
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $pengeluaranBulanIni = Transaksi::where('user_id', $userId)
+            ->where('tipe', 'keluar')
+            ->whereMonth('tanggal', now()->month)
+            ->whereYear('tanggal', now()->year)
+            ->sum('nominal');
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
+        $monthly = Transaksi::query()
+            ->selectRaw("DATE_FORMAT(tanggal, '%Y-%m') as ym")
+            ->selectRaw("SUM(CASE WHEN tipe = 'masuk' THEN nominal ELSE 0 END) as masuk")
+            ->selectRaw("SUM(CASE WHEN tipe = 'keluar' THEN nominal ELSE 0 END) as keluar")
+            ->where('user_id', $userId)
+            ->where('tanggal', '>=', now()->subMonths(5)->startOfMonth())
+            ->groupBy('ym')
+            ->orderBy('ym')
+            ->get()
+            ->keyBy('ym');
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
+        $labels = [];
+        $seriesMasuk = [];
+        $seriesKeluar = [];
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+        for ($i = 5; $i >= 0; $i--) {
+            $month = now()->subMonths($i);
+            $ym = $month->format('Y-m');
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
+            $labels[] = $month->format('M Y');
+            $seriesMasuk[] = (float) (($monthly[$ym]->masuk ?? 0));
+            $seriesKeluar[] = (float) (($monthly[$ym]->keluar ?? 0));
+        }
+
+        return view('dashboard.index', compact(
+            'totalSaldo',
+            'pemasukanBulanIni',
+            'pengeluaranBulanIni',
+            'labels',
+            'seriesMasuk',
+            'seriesKeluar'
+        ));
     }
 }

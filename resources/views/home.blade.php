@@ -2,6 +2,7 @@
 
 @section('content')
 <div class="container-xxl flex-grow-1 container-p-y">
+
     <div class="row">
         <div class="col-lg-8 mb-4 order-0">
             <div class="card">
@@ -61,39 +62,103 @@
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="col-md-12 col-lg-4 order-2 mb-4">
+    <div class="row mb-4">
+        <div class="col-md-12 col-lg-4 mb-4">
             <div class="card h-100">
                 <div class="card-header d-flex align-items-center justify-content-between">
                     <h5 class="card-title m-0 me-2">Transaksi Terakhir</h5>
                 </div>
                 <div class="card-body">
                     <ul class="p-0 m-0">
-                        @foreach($transaksiTerakhir as $trx)
+                        @forelse($transaksiTerakhir as $trx)
                         <li class="d-flex mb-4 pb-1">
                             <div class="avatar flex-shrink-0 me-3">
-                                <span class="avatar-initial rounded bg-label-{{ $trx->jenis == 'pemasukan' ? 'success' : 'danger' }}">
-                                    <i class="bx bx-{{ $trx->jenis == 'pemasukan' ? 'up' : 'down' }}-arrow-alt"></i>
+                                <span class="avatar-initial rounded bg-label-{{ $trx->tipe == 'masuk' ? 'success' : 'danger' }}">
+                                    <i class="bx bx-{{ $trx->tipe == 'masuk' ? 'up-arrow-alt' : 'down-arrow-alt' }}"></i>
                                 </span>
                             </div>
                             <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
                                 <div class="me-2">
-                                <small class="text-muted d-block mb-1">Kategori</small>
-                                <h6 class="mb-0">{{ $trx->keterangan ?? 'Tanpa keterangan' }}</h6>
+                                    <small class="text-muted d-block mb-1">{{ \Carbon\Carbon::parse($trx->tanggal)->format('d M Y') }}</small>
+                                    <h6 class="mb-0">{{ $trx->judul }}</h6>
                                 </div>
                                 <div class="user-progress d-flex align-items-center gap-1">
-                                    <h6 class="mb-0 {{ $trx->jenis == 'pemasukan' ? 'text-success' : 'text-danger' }}">
-                                        {{ $trx->jenis == 'pemasukan' ? '+' : '-' }} {{ number_format($trx->jumlah) }}
+                                    <h6 class="mb-0 {{ $trx->tipe == 'masuk' ? 'text-success' : 'text-danger' }}">
+                                        {{ $trx->tipe == 'masuk' ? '+' : '-' }} Rp {{ number_format($trx->nominal, 0, ',', '.') }}
                                     </h6>
                                 </div>
                             </div>
                         </li>
-                        @endforeach
+                        @empty
+                        <li class="text-center text-muted">Belum ada transaksi bulan ini.</li>
+                        @endforelse
                     </ul>
                 </div>
             </div>
         </div>
 
+        <div class="col-md-12 col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex align-items-center justify-content-between">
+                    <h5 class="card-title mb-0">Grafik Pemasukan vs Pengeluaran (6 Bulan Terakhir)</h5>
+                </div>
+                <div class="card-body">
+                    <div id="transaksiMasukKeluarChart"></div>
+                </div>
+            </div>
         </div>
+    </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function () {
+        var el = document.querySelector('#transaksiMasukKeluarChart');
+        if (!el || typeof ApexCharts === 'undefined') return;
+
+        var labels = @json($labels ?? []);
+        var seriesMasuk = @json($seriesMasuk ?? []);
+        var seriesKeluar = @json($seriesKeluar ?? []);
+
+        var options = {
+            chart: {
+                type: 'bar',
+                height: 320,
+                toolbar: { show: false }
+            },
+            series: [
+                { name: 'Pemasukan', data: seriesMasuk },
+                { name: 'Pengeluaran', data: seriesKeluar }
+            ],
+            plotOptions: {
+                bar: {
+                    horizontal: false,
+                    columnWidth: '55%',
+                    endingShape: 'rounded'
+                }
+            },
+            dataLabels: { enabled: false },
+            stroke: { show: true, width: 2, colors: ['transparent'] },
+            xaxis: { categories: labels },
+            yaxis: {
+                labels: {
+                    formatter: function (val) { return 'Rp ' + (val || 0).toLocaleString('id-ID'); }
+                }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val) { return 'Rp ' + (val || 0).toLocaleString('id-ID'); }
+                }
+            },
+            colors: ['#696cff', '#ff3e1d'],
+            legend: { position: 'top' }
+        };
+
+        var chart = new ApexCharts(el, options);
+        chart.render();
+    })();
+</script>
+@endpush
